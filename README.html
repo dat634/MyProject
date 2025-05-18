@@ -1,0 +1,125 @@
+# MyProject
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Game</title>
+  <style>
+    .container {
+      display: grid;
+      grid-template-columns: repeat(4, 100px); /* 4 cột, mỗi ô rộng 100px */
+      gap: 10px; /* khoảng cách giữa các ô */
+      justify-content: center;
+      margin-top: 50px;
+    }
+
+   .card {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #6dd5fa, #b8e3ff); /* gradient màu xanh lam */
+  border: 1px solid #333; /* viền đen */
+  font-size: 2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:  0.3s;
+}
+
+.card.flipped {
+  background: linear-gradient(135deg, #15dcff, #ddd); /* gradient khi lật lên */
+  border: 2px solid black;
+}
+    .again{
+      width: 35vh;
+      height: 10vh;
+      background-color: lightgray; /* màu mặc định khi chưa lật */
+      font-size: 5em;
+      cursor: pointer;
+      
+    }
+    .again:hover {
+        background-color: #ff9292;
+        border: #b8e3ff;
+        border-radius: 3vh;
+        margin: 1%;
+      }
+    .game {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="game" class="game">
+    <h1>Memory Game</h1>
+    
+    <div class="container" id="gameBoard"></div>
+    <div id="play_again" class="again"> Play again </div>
+  </div>
+  <script>
+    // Mảng các emoji đại diện cho 8 cặp
+    const emojis = ['🍕','🍟','🍔','🍣','🍩','🍿','🍇','🍓'];
+
+    // Tạo mảng gồm 16 thẻ (8 cặp) và xáo trộn ngẫu nhiên
+    const cards = [...emojis, ...emojis].sort(() => 0.5 - Math.random());
+
+    const gameBoard = document.getElementById("gameBoard"); // Thẻ div chứa các ô
+    let flipped = []; // Lưu tạm 2 thẻ đã lật
+    let lock = false; // Khóa tạm để chờ khi 2 thẻ đang hiển thị
+
+    // Tạo ô cho từng thẻ trong mảng cards
+    cards.forEach(emoji => {
+      const card = document.createElement("div"); // tạo 1 thẻ div
+      card.classList.add("card"); // gán class 'card'
+      card.dataset.emoji = emoji; // lưu emoji vào thuộc tính data để so sánh sau
+      card.textContent = ""; // chưa hiện gì cả (ẩn emoji ban đầu)
+      gameBoard.appendChild(card); // gắn vào lưới
+
+      // Sự kiện khi người chơi click vào card
+      card.addEventListener("click", () => {
+        // Nếu đang khóa hoặc card đã lật rồi thì không cho click
+        if (lock || card.classList.contains("flipped")) return;
+      play_again.addEventListener("click", () => {
+        location.reload();
+        play_again.preventDefault();
+      });
+        // Lật card: thêm class và hiện emoji
+        card.classList.add("flipped");
+        card.textContent = emoji;
+        flipped.push(card); // đẩy vào mảng đang lật
+
+        // Nếu đã có 2 thẻ được lật
+        if (flipped.length === 2) {
+          lock = true; // khóa click trong khi xử lý
+
+          const [first, second] = flipped;
+
+          // So sánh emoji của 2 card
+          if (first.dataset.emoji === second.dataset.emoji) {
+            // Nếu giống nhau → để nguyên, xóa mảng flipped
+            flipped = [];
+            lock = false;
+          } else {
+            // Nếu khác → đợi 1s rồi úp lại
+            setTimeout(() => {
+              first.classList.remove("flipped");
+              second.classList.remove("flipped");
+              first.textContent = "";
+              second.textContent = "";
+              flipped = [];
+              lock = false;
+            }, 1000); // đợi 1s
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
